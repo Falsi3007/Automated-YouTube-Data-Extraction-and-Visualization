@@ -4,82 +4,120 @@ import pandas as pd
 
 # Establish the connection
 connection = snowflake.connector.connect(
-        user='PROJECT',
-        password='Project@123456',
-        account='FZKREEM-OJB05768',
-        warehouse='COMPUTE_WH',
-        role='ACCOUNTADMIN'
-    )
+    user='PROJECT',
+    password='Project@123456',
+    account='FZKREEM-OJB05768',
+    warehouse='COMPUTE_WH',
+    role='ACCOUNTADMIN'
+)
 
 cs = connection.cursor()
 try:
-        cs.execute("CREATE DATABASE IF NOT EXISTS API_Project")
-        cs.execute("USE DATABASE API_Project")
+    cs.execute("CREATE DATABASE IF NOT EXISTS API_Project")
+    cs.execute("USE DATABASE API_Project")
 
-        cs.execute("CREATE SCHEMA IF NOT EXISTS YT_DATA")
-        cs.execute("USE SCHEMA YT_DATA")
+    cs.execute("CREATE SCHEMA IF NOT EXISTS YT_DATA")
+    cs.execute("USE SCHEMA YT_DATA")
 
-        # Create a new table for YouTube channel data
-        cs.execute("""
-            CREATE TABLE IF NOT EXISTS youtube_channel_data (
-                channelName STRING,
-                subscribers STRING,
-                views STRING,
-                totalVideos STRING,
-                publishedAt STRING
-            )
-        """)
+    # Create a new table for YouTube video data
+    cs.execute("""
+        CREATE TABLE IF NOT EXISTS youtube_video_data (
+            videoId STRING,
+            publishedAt STRING,
+            channelTitle STRING,
+            channelId STRING,
+            videoTitle STRING,
+            views STRING,
+            likes STRING
+        )
+    """)
 
-        api_key = 'AIzaSyDF3YtxwYsc3X69585lLc3wvjNKTkSlT_I'  
-        channel_ids = [
-            'UCsvqVGtbbyHaMoevxPAq9Fg', 'UCnfZSN7A09wNwYiUoincXZg', 'UCBJycsmduvYEL83R_U4JriQ'
-            'UCBwmMxybNva6P_5VmxjzwqA', 'UCaBNj5bfIpRGuEx3k3ekNoA', 'UCkWbqlDAyJh2n8DN5X6NZyg',
-            'UCh9nVJoWXmFb7sLApWGcLPQ', 'UCkAGrHCLFmlK3H2kd6isipg', 'UCjXd5MAsvEnCbzKlXdCYYKw',
-            'UCmqfX0S3x0I3uwLkPdpX03w', 'UCWOA1ZGywLbqmigxE4Qlvuw', 'UCckHqySbfy5FcPP6MD_S-Yg',
-            'UCq-Fj5jknLsUf-MWSy4_brA', 'UCJ5v_MCY6GNUBTO8-D3XoAg', 'UCiGm_E4ZwYSHV3bcW1pnSeQ',
-            'UCyoXW-Dse7fURq30EWl_CUA', 'UCX6OQ3DkcsbYNE6H8uQQuVA', 'UCOQNJjhXwvAScuELTT_i7cQ',
-            'UCIxLxlan8q9WA7sjuq6LdTQ', 'UCIsEhwBMPkRHsEgqYAPQHsA', 'UCEGC6iQjjJNCLkvLdi12BIg',
-            'UCppHT7SZKKvar4Oc9J4oljQ', 'UC56gTxNs4f9xZ7Pa2i5xNzg', 'UCIwFjwMjI0y7PDBVEO9-bkQ',
-            'UCqECaJ8Gagnn7YCbPEzWH6g', 'UCDhrZyeG5YqRpRCk5xxiErg','UCjm_qVkCPjOVDz9BWjNqO9A',
-            'UCrmsp2voP5agAXWHvEPvxsg'
-        ]
+    # YouTube API code
+    api_key = 'AIzaSyC41Mb1yBOBA6qX8ahORhWNhMkInIGjCgE'  # Hardcoded API key
+    channel_ids = [
+        # 'UCkWbqlDAyJh2n8DN5X6NZyg',
+        'UCDhrZyeG5YqRpRCk5xxiErg'
+    ]
 
-        def get_channel_stats(api_key, channel_ids):
-            all_data = []
-            base_url = 'https://www.googleapis.com/youtube/v3/channels'
-            
-            for channel_id in channel_ids:
-                params = {
-                    'part': 'snippet,statistics',
-                    'id': channel_id,
-                    'key': api_key
+    def get_channel_videos(api_key, channel_ids):
+        all_data = []
+        for channel_id in channel_ids:
+            # Get uploads playlist ID for the channel
+            channel_url = f"https://www.googleapis.com/youtube/v3/channels"
+            channel_params = {
+                'key': api_key,
+                'part': 'contentDetails',
+                'id': channel_id
+            }
+            response = requests.get(channel_url, params=channel_params).json()
+
+            # Get the uploads playlist ID
+            uploads_playlist_id = response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+
+            # Get videos from the uploads playlist
+            next_page_token = None
+            while True:
+                playlist_url = f"https://www.googleapis.com/youtube/v3/playlistItems"
+                playlist_params = {
+                    'key': api_key,
+                    'part': 'snippet',
+                    'playlistId': uploads_playlist_id,
                 }
-                response = requests.get(base_url, params=params).json()
-                
-                for item in response.get('items', []):
-                    data = {
-                        'channelName': item['snippet']['title'],
-                        'subscribers': item['statistics']['subscriberCount'],
-                        'views': item['statistics']['viewCount'],
-                        'totalVideos': item['statistics']['videoCount'],
-                        'publishedAt': item['snippet']['publishedAt']
+
+                if next_page_token:
+                    playlist_params['pageToken'] = next_page_token
+
+                playlist_response = requests.get(playlist_url, params=playlist_params).json()
+
+                # Extract video IDs
+                for item in playlist_response.get('items', []):
+                    video_id = item['snippet']['resourceId']['videoId']
+
+                    # Get detailed information for each video
+                    video_url = f"https://www.googleapis.com/youtube/v3/videos"
+                    video_params = {
+                        'key': api_key,
+                        'part': 'snippet,contentDetails,statistics',
+                        'id': video_id
                     }
-                    all_data.append(data)
-            
-            df = pd.DataFrame(all_data)
-            return df
 
-        # Fetch channel and insert into Snowflake
-        df = get_channel_stats(api_key, channel_ids)
-        for index, row in df.iterrows():
-            cs.execute("""
-                INSERT INTO youtube_channel_data (channelName, subscribers, views, totalVideos, publishedAt)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (row['channelName'], row['subscribers'], row['views'], row['totalVideos'], row['publishedAt']))
+                    video_response = requests.get(video_url, params=video_params).json()
 
-        cs.execute("SELECT * FROM youtube_channel_data")
-        for row in cs.fetchall():
-            print(row)
+                    # Loop through items (should be just one item)
+                    for video_item in video_response.get('items', []):
+                        data = {
+                            'videoId': video_item['id'],
+                            'publishedAt': video_item['snippet']['publishedAt'],
+                            'channelTitle': video_item['snippet']['channelTitle'],
+                            'channelId': video_item['snippet']['channelId'],
+                            'videoTitle': video_item['snippet']['title'],
+                            'views': video_item['statistics'].get('viewCount', '0'),
+                            'likes': video_item['statistics'].get('likeCount', '0'),
+                        }
+                        all_data.append(data)
+
+                # Check if there are more pages
+                next_page_token = playlist_response.get('nextPageToken')
+                if not next_page_token:
+                    break
+
+        # Convert to DataFrame and return
+        pd.set_option('display.max_columns', None)
+        df = pd.DataFrame(all_data)
+        return df
+
+    # Fetch video data and insert into Snowflake
+    df = get_channel_videos(api_key, channel_ids)
+    for index, row in df.iterrows():
+        cs.execute("""
+            INSERT INTO youtube_video_data (videoId, publishedAt, channelTitle, channelId, videoTitle, views, likes)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (row['videoId'], row['publishedAt'], row['channelTitle'], row['channelId'], row['videoTitle'], row['views'], row['likes']))
+
+    # Verify the inserted data
+    cs.execute("SELECT * FROM youtube_video_data")
+    for row in cs.fetchall():
+        print(row)
 finally:
-        cs.close()
+    cs.close()
 connection.close()
