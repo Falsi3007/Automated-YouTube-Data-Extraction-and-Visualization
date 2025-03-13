@@ -21,7 +21,7 @@ try:
 
         # Create a new table for YouTube playlist data
         cs.execute("""
-            CREATE OR REPLACE TABLE youtube_playlist_data (
+            CREATE TABLE IF NOT EXISTS youtube_playlist_data (
                 ChannelName STRING,
                 PlaylistId STRING,
                 PlaylistTitle STRING,
@@ -30,7 +30,9 @@ try:
         """)
 
         api_key = 'AIzaSyC41Mb1yBOBA6qX8ahORhWNhMkInIGjCgE'  
-        channel_ids = ['UCaBNj5bfIpRGuEx3k3ekNoA', 'UCnfZSN7A09wNwYiUoincXZg']
+        channel_ids = [
+        # 'UCaBNj5bfIpRGuEx3k3ekNoA'
+                        'UCnfZSN7A09wNwYiUoincXZg']
 
         def get_channel_playlists(api_key, channel_ids):
             all_data = []
