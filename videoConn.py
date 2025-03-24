@@ -5,7 +5,7 @@ import pandas as pd
 # Establish the connection
 connection = snowflake.connector.connect(
     user='PROJECT',
-    password='Project@123456',
+    password='Project@1234567',
     account='FZKREEM-OJB05768',
     warehouse='COMPUTE_WH',
     role='ACCOUNTADMIN'
@@ -35,8 +35,8 @@ try:
     # YouTube API code
     api_key = 'AIzaSyC41Mb1yBOBA6qX8ahORhWNhMkInIGjCgE'  # Hardcoded API key
     channel_ids = [
-        # 'UCkWbqlDAyJh2n8DN5X6NZyg',
-        'UCDhrZyeG5YqRpRCk5xxiErg'
+         'UCaBNj5bfIpRGuEx3k3ekNoA',
+                        'UCnfZSN7A09wNwYiUoincXZg'
     ]
 
     def get_channel_videos(api_key, channel_ids):
