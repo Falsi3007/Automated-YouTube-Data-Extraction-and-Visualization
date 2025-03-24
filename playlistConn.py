@@ -5,7 +5,7 @@ import pandas as pd
 # Establish the connection
 connection = snowflake.connector.connect(
         user='PROJECT',
-        password='Project@123456',
+        password='Project@1234567',
         account='FZKREEM-OJB05768',
         warehouse='COMPUTE_WH',
         role='ACCOUNTADMIN'
@@ -31,7 +31,7 @@ try:
 
         api_key = 'AIzaSyC41Mb1yBOBA6qX8ahORhWNhMkInIGjCgE'  
         channel_ids = [
-        # 'UCaBNj5bfIpRGuEx3k3ekNoA'
+        'UCaBNj5bfIpRGuEx3k3ekNoA',
                         'UCnfZSN7A09wNwYiUoincXZg']
 
         def get_channel_playlists(api_key, channel_ids):
