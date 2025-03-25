@@ -18,7 +18,6 @@ try:
     cs.execute("CREATE SCHEMA IF NOT EXISTS YT_DATA")
     cs.execute("USE SCHEMA YT_DATA")
 
-    # Create a new table for YouTube video data
     cs.execute("""
         CREATE TABLE IF NOT EXISTS youtube_video_data (
             videoId STRING,
@@ -82,7 +81,7 @@ try:
 
                     video_response = requests.get(video_url, params=video_params).json()
 
-                    # Loop through items (should be just one item)
+                    # Loop through items 
                     for video_item in video_response.get('items', []):
                         data = {
                             'videoId': video_item['id'],
