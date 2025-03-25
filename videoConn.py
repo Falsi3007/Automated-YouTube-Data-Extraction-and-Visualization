@@ -43,7 +43,7 @@ try:
         all_data = []
         for channel_id in channel_ids:
             # Get uploads playlist ID for the channel
-            channel_url = f"https://www.googleapis.com/youtube/v3/channels"
+            channel_url = "https://www.googleapis.com/youtube/v3/channels"
             channel_params = {
                 'key': api_key,
                 'part': 'contentDetails',
@@ -57,7 +57,7 @@ try:
             # Get videos from the uploads playlist
             next_page_token = None
             while True:
-                playlist_url = f"https://www.googleapis.com/youtube/v3/playlistItems"
+                playlist_url = "https://www.googleapis.com/youtube/v3/playlistItems"
                 playlist_params = {
                     'key': api_key,
                     'part': 'snippet',
@@ -74,7 +74,7 @@ try:
                     video_id = item['snippet']['resourceId']['videoId']
 
                     # Get detailed information for each video
-                    video_url = f"https://www.googleapis.com/youtube/v3/videos"
+                    video_url = "https://www.googleapis.com/youtube/v3/videos"
                     video_params = {
                         'key': api_key,
                         'part': 'snippet,contentDetails,statistics',
