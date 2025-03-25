@@ -33,7 +33,7 @@ try:
     """)
 
     # YouTube API code
-    api_key = 'AIzaSyC41Mb1yBOBA6qX8ahORhWNhMkInIGjCgE'  # Hardcoded API key
+    api_key = 'AIzaSyC41Mb1yBOBA6qX8ahORhWNhMkInIGjCgE'  
     channel_ids = [
          'UCaBNj5bfIpRGuEx3k3ekNoA',
                         'UCnfZSN7A09wNwYiUoincXZg'
