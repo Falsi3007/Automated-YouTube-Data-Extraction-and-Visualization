@@ -2,7 +2,6 @@ import snowflake.connector
 import requests
 import pandas as pd
 
-# Establish the connection
 connection = snowflake.connector.connect(
     user='PROJECT',
     password='Project@1234567',
