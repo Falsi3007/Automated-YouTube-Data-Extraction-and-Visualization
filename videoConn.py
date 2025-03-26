@@ -2,9 +2,12 @@ import snowflake.connector
 import requests
 import pandas as pd
 
+from dotenv import dotenv_values
+my_secrets = dotenv_values(".env")
+
 connection = snowflake.connector.connect(
-    user='PROJECT',
-    password='Project@1234567',
+    user=my_secrets['USER'],
+    password=my_secrets['PASS'],
     account='FZKREEM-OJB05768',
     warehouse='COMPUTE_WH',
     role='ACCOUNTADMIN'
