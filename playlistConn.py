@@ -8,10 +8,10 @@ my_secrets = dotenv_values(".env")
 # Establish the connection
 connection = snowflake.connector.connect(
     user=my_secrets['USER'],
-    password=my_secrets['PASS'],
-    account='FZKREEM-OJB05768',
-    warehouse='COMPUTE_WH',
-    role='ACCOUNTADMIN'
+    password=my_secrets['PASSWORD'],
+    account=my_secrets['ACCOUNT'],
+    warehouse=my_secrets['WAREHOUSE'],
+    role=my_secrets['ROLE']
     )
 
 cs = connection.cursor()
