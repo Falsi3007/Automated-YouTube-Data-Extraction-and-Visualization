@@ -2,13 +2,15 @@ import snowflake.connector
 import requests
 import pandas as pd
 
-# Establish the connection
+from dotenv import dotenv_values
+my_secrets = dotenv_values(".env")
+
 connection = snowflake.connector.connect(
-    user='PROJECT',
-    password='Project@1234567',
-    account='FZKREEM-OJB05768',
-    warehouse='COMPUTE_WH',
-    role='ACCOUNTADMIN'
+    user=my_secrets['USER'],
+    password=my_secrets['PASSWORD'],
+    account=my_secrets['ACCOUNT'],
+    warehouse=my_secrets['WAREHOUSE'],
+    role=my_secrets['ROLE']
 )
 
 cs = connection.cursor()
@@ -19,7 +21,6 @@ try:
     cs.execute("CREATE SCHEMA IF NOT EXISTS YT_DATA")
     cs.execute("USE SCHEMA YT_DATA")
 
-    # Create a new table for YouTube video data
     cs.execute("""
         CREATE TABLE IF NOT EXISTS youtube_video_data (
             videoId STRING,
@@ -33,7 +34,7 @@ try:
     """)
 
     # YouTube API code
-    api_key = 'AIzaSyC41Mb1yBOBA6qX8ahORhWNhMkInIGjCgE'  # Hardcoded API key
+    api_key = 'AIzaSyC41Mb1yBOBA6qX8ahORhWNhMkInIGjCgE'  
     channel_ids = [
          'UCaBNj5bfIpRGuEx3k3ekNoA',
                         'UCnfZSN7A09wNwYiUoincXZg'
@@ -43,7 +44,7 @@ try:
         all_data = []
         for channel_id in channel_ids:
             # Get uploads playlist ID for the channel
-            channel_url = f"https://www.googleapis.com/youtube/v3/channels"
+            channel_url = "https://www.googleapis.com/youtube/v3/channels"
             channel_params = {
                 'key': api_key,
                 'part': 'contentDetails',
@@ -57,7 +58,7 @@ try:
             # Get videos from the uploads playlist
             next_page_token = None
             while True:
-                playlist_url = f"https://www.googleapis.com/youtube/v3/playlistItems"
+                playlist_url = "https://www.googleapis.com/youtube/v3/playlistItems"
                 playlist_params = {
                     'key': api_key,
                     'part': 'snippet',
@@ -74,7 +75,7 @@ try:
                     video_id = item['snippet']['resourceId']['videoId']
 
                     # Get detailed information for each video
-                    video_url = f"https://www.googleapis.com/youtube/v3/videos"
+                    video_url = "https://www.googleapis.com/youtube/v3/videos"
                     video_params = {
                         'key': api_key,
                         'part': 'snippet,contentDetails,statistics',
@@ -83,7 +84,7 @@ try:
 
                     video_response = requests.get(video_url, params=video_params).json()
 
-                    # Loop through items (should be just one item)
+                    # Loop through items 
                     for video_item in video_response.get('items', []):
                         data = {
                             'videoId': video_item['id'],
